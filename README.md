@@ -7,7 +7,7 @@ It requires Kubernetes 1.7 or greater.
 
 ## Limitations
 1. Scaling is not currently supported. An ensemble's membership can not be updated in a safe way in 
-ZooKeeper 3.4.10 (The current stable release).
+ZooKeeper 3.8.0 (The current stable release).
 1. Observers are currently not supported. Contributions are welcome.
 1. Persistent Volumes must be used. emptyDirs will likely result in a loss of data.
 
@@ -36,7 +36,7 @@ you are willing to tolerate at most one planned or unplanned failure, you should
 done by setting the `spec.replicas` field of the StatefulSet to 3,
 
 ```yaml
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -49,7 +49,7 @@ spec:
 and passing in 3 as `--servers` parameter to the `start-zookeeper` script.
 
 ```yaml
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -70,7 +70,7 @@ While ZooKeeper periodically snapshots all of its data to its data directory, th
 heap. The `--heap` parameter of the `start-zookeeper` script controls the heap size of the ZooKeeper servers, 
 
 ```yaml 
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -87,7 +87,7 @@ metadata:
 and the `spec.template.containers[0].resources.requests.memory` controls the memory allocated to the JVM process.
 
 ```yaml
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -96,7 +96,7 @@ spec:
       containers:
       - name: kubernetes-zookeeper
         imagePullPolicy: Always
-        image: "gcr.io/google_containers/kubernetes-zookeeper:1.0-3.4.10"
+        image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.8.0"
         resources:
           requests:
             memory: "1Gi"
@@ -112,7 +112,7 @@ necessary. For a demonstration deployment, you can set the CPUs as low as 0.5. T
 setting the StatefulSet's `spec.template.containers[0].resources.requests.cpus`.
 
 ```yaml
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -121,7 +121,7 @@ spec:
       containers:
       - name: kubernetes-zookeeper
         imagePullPolicy: Always
-        image: "gcr.io/google_containers/kubernetes-zookeeper:1.0-3.4.10"
+        image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.8.0"
         resources:
           requests:
             memory: "4Gi"
@@ -155,7 +155,7 @@ These ports must correspond to the container ports in the StatefulSet's `.spec.t
 the `start-zookeeper` script.
 
 ```yaml
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -206,7 +206,7 @@ parameter passed to the `start-zookeeper` script.
 
 ```yaml
 ```yaml
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -317,7 +317,7 @@ ZooKeeper is not sensitive to the order in which Pods are started. All Pods in t
 terminated in parallel. This is accomplished by setting the `spec.podManagementPolicy` to `Parallel`.
 
 ```yaml
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -332,7 +332,7 @@ The Update Strategy for the StatefulSet is set to `RollingUpdate`. This enables 
 StatefulSets in Kubernetes 1.7, and it allows for modifications to the StatefulSet to be propagated to its Pods.
 
 ```yaml
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -395,7 +395,7 @@ recurring Kubernetes job can be used to collect these metrics and provide them t
 
 ```bash
 bash$ kubectl exec zk-0 zookeeper-metrics
-zk_version	3.4.10-1757313, built on 08/23/2016 06:50 GMT
+zk_version	3.8.0-1757313, built on 08/23/2016 06:50 GMT
 zk_avg_latency	0
 zk_max_latency	0
 zk_min_latency	0

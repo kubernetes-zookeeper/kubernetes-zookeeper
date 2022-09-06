@@ -9,7 +9,7 @@
 * Kubernetes 1.7
 * PersistentVolume support on the underlying infrastructure
 * A dynamic provisioner for the PersistentVolumes
-* A familiarity with [Apache ZooKeeper 3.4.x](https://zookeeper.apache.org/doc/current/)
+* A familiarity with [Apache ZooKeeper 3.8.x](https://zookeeper.apache.org/doc/current/)
 
 ## Chart Components
 This chart will do the following:
@@ -28,8 +28,8 @@ ZooKeeper ensemble across nodes.
 You can install the chart with the release name `my-zk` as below.
 
 ```shell
-$ helm repo add k8szk https://kow3ns.github.io/kubernetes-zookeeper/helm/repo/
-$ helm install --name my-zk k8s/zookeeper --values=<values>
+$ helm repo add k8szk https://kubernetes-zookeeper.github.io/kubernetes-zookeeper/helm/repo/
+$ helm install my-zk k8szk/zookeeper --values=<values>
 ```
 
 If you do not specify a name, helm will select a name for you.

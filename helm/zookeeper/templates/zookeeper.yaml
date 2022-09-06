@@ -34,12 +34,12 @@ spec:
   selector:
     component: "{{ printf "zk-%s" .Release.Name  | trunc 24 }}"
 ---
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: "{{ printf "zk-pdb-%s" .Release.Name | trunc 24 }}"
   annotations:
-    helm.sh/created: {{.Release.Time.Seconds | quote }}
+    helm.sh/created: {{now | quote }}
   labels:
     heritage: {{.Release.Service | quote }}
     release: {{.Release.Name | quote }}
@@ -51,18 +51,21 @@ spec:
       component: "{{ printf "zk-%s" .Release.Name  | trunc 24 }}"
   maxUnavailable: {{.Values.MaxUnavailable}}
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: "{{ printf "zk-%s" .Release.Name  | trunc 24 }}"
   annotations:
-    helm.sh/created: {{.Release.Time.Seconds | quote }}
+    helm.sh/created: {{now | quote }}
   labels:
     heritage: {{.Release.Service | quote }}
     release: {{.Release.Name | quote }}
     chart: "{{.Chart.Name}}-{{.Chart.Version}}"
     component: "{{ printf "zk-%s" .Release.Name  | trunc 24 }}"
 spec:
+  selector:
+    matchLabels:
+      component: "{{ printf "zk-%s" .Release.Name  | trunc 24 }}"
   serviceName: "{{ printf "zk-hs-%s" .Release.Name | trunc 24 }}"
   replicas: {{.Values.Servers}}
   podManagementPolicy: Parallel
@@ -102,6 +105,9 @@ spec:
       - name: k8szk
         imagePullPolicy: {{.Values.ImagePullPolicy}}
         image: {{.Values.Image}}
+        env:
+        - name: ZOO_4LW_COMMANDS_WHITELIST
+          value: "{{.Values.ZooKeeper4LetterWordCommandsWhiteList}}"
         resources:
           requests:
             memory: {{.Values.Memory}}
@@ -154,8 +160,8 @@ spec:
         - name: datadir
           mountPath: /var/lib/zookeeper
       securityContext:
-        fsGroup: 1000
-        runAsUser: 1000
+        fsGroup: 1010
+        runAsUser: 1010
   volumeClaimTemplates:
   - metadata:
       name: datadir

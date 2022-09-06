@@ -28,7 +28,7 @@ spec:
   selector:
     app: zk
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
@@ -56,7 +56,7 @@ spec:
       containers:
       - name: kubernetes-zookeeper
         imagePullPolicy: Always
-        image: "gcr.io/google_containers/kubernetes-zookeeper:1.0-3.4.10"
+        image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.8.0"
         resources:
           requests:
             memory: "1Gi"
@@ -109,8 +109,8 @@ spec:
         - name: datadir
           mountPath: /var/lib/zookeeper
       securityContext:
-        runAsUser: 1000
-        fsGroup: 1000
+        runAsUser: 1010
+        fsGroup: 1010
   volumeClaimTemplates:
   - metadata:
       name: datadir

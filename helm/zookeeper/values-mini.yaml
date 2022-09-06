@@ -1,12 +1,12 @@
 Servers: 3
-Cpu: "0.5"
-Memory: "1Gi"
-Heap: "512M"
-Storage: "10Gi"
+Cpu: "2"
+Memory: "4Gi"
+Heap: "2G"
+Storage: "250Gi"
 ServerPort: 2888
 LeaderElectionPort: 3888
 ClientPort: 2181
-Image: "gcr.io/google_containers/kubernetes-zookeeper:1.0-3.4.10"
+Image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.8.0"
 ImagePullPolicy: "Always"
 TickTimeMs: 2000
 InitTicks: 10
@@ -16,9 +16,10 @@ SnapRetain: 3
 PurgeHours: 1
 ProbeInitialDelaySeconds : 15
 ProbeTimeoutSeconds : 5
-AntiAffinity: "soft"
+AntiAffinity: "hard"
 LogLevel: "INFO"
 MaxSessionTimeout: 40000
 MinSessionTimeout: 4000
 UpdateStrategy: RollingUpdate
 MaxUnavailable: 1
+ZooKeeper4LetterWordCommandsWhiteList: conf,cons,crst,dump,envi,ruok,srst,srvr,stat,wchs,wchc,dirs,wchp,mntr,isro,gtmk,stmk

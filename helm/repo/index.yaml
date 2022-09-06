@@ -15,8 +15,8 @@ entries:
     name: zookeeper
     sources:
     - https://github.com/apache/zookeeper
-    - https://github.com/kow3ns/kubernetes-zookeeper
+    - https://github.com/kubernetes-zookeeper/kubernetes-zookeeper
     urls:
-    - https://kow3ns.github.io/kubernetes-zookeeper/helm/repo/zookeeper-1.0.tgz
+    - https://kubernetes-zookeeper.github.io/kubernetes-zookeeper/helm/repo/zookeeper-1.0.tgz
     version: "1.0"
 generated: 2017-06-30T13:36:08.088352621-07:00

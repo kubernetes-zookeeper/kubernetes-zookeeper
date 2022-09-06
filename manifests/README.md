@@ -128,7 +128,7 @@ zookeeper_mini.yaml manifest to decrease the memory resource request and the jvm
 ```yaml
  name: kubernetes-zookeeper
         imagePullPolicy: Always
-        image: "gcr.io/google_samples/kubernetes-zookeeper:1.0-3.4.10"
+        image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.8.0"
         resources:
           requests:
             memory: "512Gi"
@@ -276,7 +276,7 @@ spec:
       containers:
       - name: kubernetes-zookeeper
         imagePullPolicy: Always
-        image: "gcr.io/google_containers/kubernetes-zookeeper:1.0-3.4.10"
+        image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.8.0"
         resources:
           requests:
             memory: "4Gi"
@@ -329,8 +329,8 @@ spec:
         - name: datadir
           mountPath: /var/lib/zookeeper
       securityContext:
-        runAsUser: 1000
-        fsGroup: 1000
+        runAsUser: 1010
+        fsGroup: 1010
   volumeClaimTemplates:
   - metadata:
       name: datadir
