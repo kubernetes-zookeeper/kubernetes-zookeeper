@@ -1,46 +1,30 @@
-FROM ubuntu:16.04 
+FROM ubuntu:20.04
 ENV ZK_USER=zookeeper \
 ZK_USER_ID=1010 \
 ZK_GROUP_ID=1010 \
 ZK_DATA_DIR=/var/lib/zookeeper/data \
 ZK_DATA_LOG_DIR=/var/lib/zookeeper/log \
 ZK_LOG_DIR=/var/log/zookeeper \
-JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
-ARG GPG_KEY=C823E3E5B12AF29C67F81976F5CECB3CB5E9BD2D
-ARG ZK_DIST=zookeeper-3.8.1
+ARG ZK_DIST=zookeeper-3.8.2
 ENV ZK_DIST_APACHE=apache-${ZK_DIST}-bin
 ENV ZK_DIST_PACKAGE=${ZK_DIST_APACHE}.tar.gz
 RUN set -x \
     && apt-get update \
-    && apt-get install -y openjdk-8-jre-headless wget netcat-openbsd \
-	&& wget -q "http://www.apache.org/dist/zookeeper/${ZK_DIST}/${ZK_DIST_PACKAGE}" \
-    && wget -q "http://www.apache.org/dist/zookeeper/${ZK_DIST}/${ZK_DIST_PACKAGE}.asc" \
-    && export GNUPGHOME="$(mktemp -d)" \
+    && apt-get install -y openjdk-11-jre-headless wget netcat-openbsd \
+    && wget -q "http://www.apache.org/dist/zookeeper/${ZK_DIST}/${ZK_DIST_PACKAGE}" \
     && tar -xzf "${ZK_DIST_PACKAGE}" -C /opt \
-    && rm -r "$GNUPGHOME" "${ZK_DIST_PACKAGE}" "${ZK_DIST_PACKAGE}.asc" \
+    && rm -r "${ZK_DIST_PACKAGE}" \
     && ln -s /opt/${ZK_DIST_APACHE} /opt/zookeeper \
-    && rm -rf /opt/zookeeper/CHANGES.txt \
-    /opt/zookeeper/README.txt \
+    && rm -rf /opt/zookeeper/README.txt \
     /opt/zookeeper/NOTICE.txt \
-    /opt/zookeeper/CHANGES.txt \
     /opt/zookeeper/README_packaging.txt \
-    /opt/zookeeper/build.xml \
-    /opt/zookeeper/config \
-    /opt/zookeeper/contrib \
-    /opt/zookeeper/dist-maven \
     /opt/zookeeper/docs \
-    /opt/zookeeper/ivy.xml \
-    /opt/zookeeper/ivysettings.xml \
-    /opt/zookeeper/recipes \
-    /opt/zookeeper/src \
-    /opt/zookeeper/${ZK_DIST}.jar.asc \
-    /opt/zookeeper/${ZK_DIST}.jar.md5 \
-    /opt/zookeeper/${ZK_DIST}.jar.sha1 \
-	&& apt-get autoremove -y wget \
-	&& rm -rf /var/lib/apt/lists/*
+    && apt-get autoremove -y wget \
+    && rm -rf /var/lib/apt/lists/*
 
-#Copy configuration generator script to bin
+# Copy configuration generator script to bin
 COPY scripts /opt/zookeeper/bin/
 
 # Create a user for the zookeeper process and configure file system ownership 
