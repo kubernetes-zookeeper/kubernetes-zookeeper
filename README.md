@@ -7,7 +7,7 @@ It requires Kubernetes 1.7 or greater.
 
 ## Limitations
 1. Scaling is not currently supported. An ensemble's membership can not be updated in a safe way in 
-ZooKeeper 3.8.2 (The current zookeeper release).
+ZooKeeper 3.8.2 (The current stable ZooKeeper release).
 1. Observers are currently not supported. Contributions are welcome.
 1. Persistent Volumes must be used. emptyDirs will likely result in a loss of data.
 
