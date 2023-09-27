@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 ENV ZK_USER=zookeeper \
 ZK_USER_ID=1010 \
 ZK_GROUP_ID=1010 \
