@@ -1,4 +1,4 @@
-VERSION=1.0-3.8.1
+VERSION=1.0-3.8.4
 PROJECT=kuberneteszookeeper
 DOCKER_IMAGE=kubernetes-zookeeper
 
