@@ -68,7 +68,7 @@ spec:
       containers:
       - name: kubernetes-zookeeper
         imagePullPolicy: Always
-        image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.8.4"
+        image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.9.3"
         resources:
           requests:
             memory: "1Gi"

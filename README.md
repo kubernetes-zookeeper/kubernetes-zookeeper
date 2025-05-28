@@ -7,7 +7,7 @@ It requires Kubernetes 1.7 or greater.
 
 ## Limitations
 1. Scaling is not currently supported. An ensemble's membership can not be updated in a safe way in 
-ZooKeeper 3.8.4 (The current zookeeper release).
+ZooKeeper 3.9.3 (The current zookeeper release).
 1. Observers are currently not supported. Contributions are welcome.
 1. Persistent Volumes must be used. emptyDirs will likely result in a loss of data.
 
@@ -96,7 +96,7 @@ spec:
       containers:
       - name: kubernetes-zookeeper
         imagePullPolicy: Always
-        image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.8.4"
+        image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.9.3"
         resources:
           requests:
             memory: "1Gi"
@@ -121,7 +121,7 @@ spec:
       containers:
       - name: kubernetes-zookeeper
         imagePullPolicy: Always
-        image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.8.4"
+        image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.9.3"
         resources:
           requests:
             memory: "4Gi"
@@ -395,7 +395,7 @@ recurring Kubernetes job can be used to collect these metrics and provide them t
 
 ```bash
 bash$ kubectl exec zk-0 zookeeper-metrics
-zk_version	3.8.4-1757313, built on 08/23/2016 06:50 GMT
+zk_version	3.9.3-1757313, built on 08/23/2016 06:50 GMT
 zk_avg_latency	0
 zk_max_latency	0
 zk_min_latency	0

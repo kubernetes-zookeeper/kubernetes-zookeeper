@@ -8,7 +8,7 @@ ZK_LOG_DIR=/var/log/zookeeper \
 JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
 ARG GPG_KEY=C823E3E5B12AF29C67F81976F5CECB3CB5E9BD2D
-ARG ZK_DIST=zookeeper-3.8.4
+ARG ZK_DIST=zookeeper-3.9.3
 ENV ZK_DIST_APACHE=apache-${ZK_DIST}-bin
 ENV ZK_DIST_PACKAGE=${ZK_DIST_APACHE}.tar.gz
 RUN set -x \
