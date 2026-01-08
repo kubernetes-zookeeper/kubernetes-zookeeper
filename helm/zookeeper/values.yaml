@@ -23,3 +23,12 @@ MinSessionTimeout: 4000
 UpdateStrategy: RollingUpdate
 MaxUnavailable: 1
 ZooKeeper4LetterWordCommandsWhiteList: conf,cons,crst,dump,envi,ruok,srst,srvr,stat,wchs,wchc,dirs,wchp,mntr,isro,gtmk,stmk
+RunAsUser: 1010
+FsGroup: 1010
+OpenShift: false
+ServiceAccount:
+  create: true
+  name: "zookeeper"
+  clusterRole:
+    nonroot-v2:
+      enabled: true

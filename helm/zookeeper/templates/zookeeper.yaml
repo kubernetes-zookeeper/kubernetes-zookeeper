@@ -1,3 +1,31 @@
+{{- if .Values.ServiceAccount.create }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.ServiceAccount.name }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "{{ printf "zk-%s" .Release.Name  | trunc 24 }}"
+{{- end }}
+{{- if and .Values.OpenShift (index .Values.ServiceAccount.clusterRole "nonroot-v2" "enabled") }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: system:openshift:scc:nonroot-v2
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:nonroot-v2
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.ServiceAccount.name }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Service
@@ -76,6 +104,9 @@ spec:
       labels:
         component: "{{ printf "zk-%s" .Release.Name  | trunc 24 }}"
     spec:
+      {{- if or .Values.ServiceAccount.create .Values.ServiceAccount.name }}
+      serviceAccountName: {{ .Values.ServiceAccount.name }}
+      {{- end }}
       {{- if eq .Values.AntiAffinity "hard"}}
       affinity:
         podAntiAffinity:
@@ -159,9 +190,15 @@ spec:
         volumeMounts:
         - name: datadir
           mountPath: /var/lib/zookeeper
+      {{- if or .Values.RunAsUser .Values.FsGroup }}
       securityContext:
-        fsGroup: 1010
-        runAsUser: 1010
+        {{- if .Values.FsGroup }}
+        fsGroup: {{ .Values.FsGroup }}
+        {{- end }}
+        {{- if .Values.RunAsUser }}
+        runAsUser: {{ .Values.RunAsUser }}
+        {{- end }}
+      {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: datadir
