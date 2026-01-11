@@ -4,6 +4,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .Values.ServiceAccount.name }}
+  namespace: {{ .Release.Namespace }}
   labels:
     heritage: {{.Release.Service | quote }}
     release: {{.Release.Name | quote }}
@@ -15,7 +16,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: system:openshift:scc:nonroot-v2
+  name: {{ printf "zk-scc-nonroot-v2-%s" .Release.Name | trunc 63 }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -136,11 +137,23 @@ spec:
       - name: k8szk
         imagePullPolicy: {{.Values.ImagePullPolicy}}
         image: {{.Values.Image}}
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          {{- if .Values.RunAsUser }}
+          runAsUser: {{ .Values.RunAsUser }}
+          {{- end }}
+          capabilities:
+            drop:
+            - ALL
         env:
         - name: ZOO_4LW_COMMANDS_WHITELIST
           value: "{{.Values.ZooKeeper4LetterWordCommandsWhiteList}}"
         resources:
           requests:
+            memory: {{.Values.Memory}}
+            cpu: {{.Values.Cpu}}
+          limits:
             memory: {{.Values.Memory}}
             cpu: {{.Values.Cpu}}
         ports:
@@ -179,6 +192,9 @@ spec:
             - "zookeeper-ready {{.Values.ClientPort}}"
           initialDelaySeconds: {{.Values.ProbeInitialDelaySeconds}}
           timeoutSeconds: {{.Values.ProbeTimeoutSeconds}}
+          periodSeconds: {{.Values.ProbePeriodSeconds}}
+          successThreshold: {{.Values.ProbeSuccessThreshold}}
+          failureThreshold: {{.Values.ProbeFailureThreshold}}
         livenessProbe:
           exec:
             command:
@@ -187,6 +203,9 @@ spec:
             - "zookeeper-ready {{.Values.ClientPort}}"
           initialDelaySeconds: {{.Values.ProbeInitialDelaySeconds}}
           timeoutSeconds: {{.Values.ProbeTimeoutSeconds}}
+          periodSeconds: {{.Values.ProbePeriodSeconds}}
+          successThreshold: {{.Values.ProbeSuccessThreshold}}
+          failureThreshold: {{.Values.ProbeFailureThreshold}}
         volumeMounts:
         - name: datadir
           mountPath: /var/lib/zookeeper

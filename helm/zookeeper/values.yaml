@@ -1,34 +1,74 @@
+# Number of ZooKeeper servers in the ensemble (should be 1, 3, 5, or 7)
 Servers: 3
+# CPU resource request per server
 Cpu: "2"
+# Memory resource request per server
 Memory: "4Gi"
+# JVM heap size for ZooKeeper
 Heap: "2G"
+# Persistent volume storage size per server
 Storage: "250Gi"
+# Port for server-to-server communication
 ServerPort: 2888
+# Port for leader election
 LeaderElectionPort: 3888
+# Port for client connections
 ClientPort: 2181
+# ZooKeeper container image
 Image: "kuberneteszookeeper/kubernetes-zookeeper:1.0-3.9.3"
+# Image pull policy
 ImagePullPolicy: "Always"
+# ZooKeeper tick time in milliseconds
 TickTimeMs: 2000
+# Initial synchronization timeout in ticks
 InitTicks: 10
+# Synchronization timeout in ticks
 SyncTicks: 5
+# Maximum client connections per server
 ClientCnxns: 60
+# Number of snapshots to retain
 SnapRetain: 3
+# Hours between snapshot and log purges (0 to disable)
 PurgeHours: 1
+# Initial delay before liveness/readiness probes start
 ProbeInitialDelaySeconds : 15
+# Timeout for liveness/readiness probes
 ProbeTimeoutSeconds : 5
+# Period between probe executions in seconds
+ProbePeriodSeconds: 10
+# Number of consecutive successes required for probe to be considered successful
+ProbeSuccessThreshold: 1
+# Number of consecutive failures required for probe to be considered failed
+ProbeFailureThreshold: 3
+# Pod anti-affinity: "hard" (required) or "soft" (preferred)
 AntiAffinity: "hard"
+# ZooKeeper log level (ERROR, WARN, INFO, DEBUG)
 LogLevel: "INFO"
+# Maximum session timeout in milliseconds
 MaxSessionTimeout: 40000
+# Minimum session timeout in milliseconds
 MinSessionTimeout: 4000
+# StatefulSet update strategy
 UpdateStrategy: RollingUpdate
+# Maximum unavailable pods during disruption
 MaxUnavailable: 1
+# Whitelist of allowed 4-letter word commands
 ZooKeeper4LetterWordCommandsWhiteList: conf,cons,crst,dump,envi,ruok,srst,srvr,stat,wchs,wchc,dirs,wchp,mntr,isro,gtmk,stmk
+# User ID to run containers as (empty string for platform-managed)
 RunAsUser: 1010
+# Group ID for volume ownership (empty string for platform-managed)
 FsGroup: 1010
+# Enable OpenShift-specific features (creates SCC RoleBinding when true)
 OpenShift: false
+# ServiceAccount configuration
 ServiceAccount:
+  # Whether to create a ServiceAccount
   create: true
+  # ServiceAccount name
   name: "zookeeper"
+  # ClusterRole configuration for OpenShift SCCs
   clusterRole:
+    # nonroot-v2 SCC RoleBinding (OpenShift only, requires OpenShift: true)
     nonroot-v2:
+      # Enable nonroot-v2 SCC RoleBinding
       enabled: true

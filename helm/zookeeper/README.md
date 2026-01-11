@@ -25,11 +25,12 @@ ZooKeeper ensemble across nodes.
 
 ## Installing the Chart
 
-You can install the chart with the release name `my-zk` as below.
+The ZooKeeper Helm chart is available from the official Helm repository. You can install the chart with the release name `my-zk` as below.
 
 ```shell
 $ helm repo add k8szk https://kubernetes-zookeeper.github.io/kubernetes-zookeeper/helm/repo/
-$ helm install my-zk k8szk/zookeeper --values=<values>
+$ helm repo update
+$ helm install my-zk k8szk/zookeeper --namespace my-zk --create-namespace
 ```
 
 If you do not specify a name, helm will select a name for you.
@@ -68,21 +69,25 @@ Alternatively, a YAML file that specifies the values for the parameters can be p
 For example,
 
 ```shell
-$ helm install --name my-release -f values.yaml incubator/zookeeper
+$ helm repo add k8szk https://kubernetes-zookeeper.github.io/kubernetes-zookeeper/helm/repo/
+$ helm repo update
+$ helm install my-release k8szk/zookeeper --namespace my-release --create-namespace -f values.yaml
 ```
 
 ### Values
-You can use [values.yaml](values.yaml), [value-mini.yaml](values-mini.yaml), or [value-micro.yaml](values-micro.yaml) 
-as a starting point for configuring an ensemble.
+You can use [values.yaml](values.yaml), [values-mini.yaml](values-mini.yaml), or [values-micro.yaml](values-micro.yaml) 
+as a starting point for configuring an ensemble. These values files work for both Kubernetes and OpenShift.
 
 1. [values.yaml](values.yaml) installs an ensemble that is close to production readiness.
-    - It provides 5 servers with a disruption budget of 1 planned disruption. This ensemble will tolerate 1 planned and 
+    - It provides 3 servers with a disruption budget of 1 planned disruption. This ensemble will tolerate 1 planned and 
     1 unplanned failure.
-    - Each server will consume 4 GiB of memory, 3 Gib of which will be dedicated to the ZooKeeper JVM heap.
+    - Each server will consume 4 GiB of memory, 2 GiB of which will be dedicated to the ZooKeeper JVM heap.
     - Each server will consume 2 CPUs.
     - Each server will consume 1 Persistent Volume with 250 GiB of storage.
-    - You can tune the parameters as nessecary to suite the needs of your deployment.
-    - **The total footprint is 5 Nodes, 10 CPUs, 20 GiB memory, 1250 GiB disk**
+    - Security context is configured with `RunAsUser: 1010` and `FsGroup: 1010` to match common StorageClass mountOptions.
+    - A ServiceAccount named `zookeeper` is created by default.
+    - You can tune the parameters as necessary to suit the needs of your deployment.
+    - **The total footprint is 3 Nodes, 6 CPUs, 12 GiB memory, 750 GiB disk**
 1. [values-mini.yaml](values-mini.yaml) installs an ensemble that is suitable for a demos, testing, or 
 development use cases where a single zookeeper server is not desirable. 
     - It provides 3 servers with a disruption budget of 1 planned disruption. This ensemble will not tolerate any 
@@ -102,6 +107,49 @@ development use cases where a single zookeeper server is not desirable.
     - The server will consume 1 Persistent Volume with 10 GiB of storage.
     - **The total footprint is 1 Node, 0.5 CPUs, 1 GiB memory, 10 GiB disk**
 
+### OpenShift Compatibility
+
+This chart is compatible with both Kubernetes and OpenShift. By default, `RunAsUser` and `FsGroup` are set to `1010` to match common StorageClass mountOptions requirements.
+
+**For Kubernetes deployments:**
+The default values work out of the box. You can override them if needed:
+```bash
+helm repo add k8szk https://kubernetes-zookeeper.github.io/kubernetes-zookeeper/helm/repo/
+helm repo update
+helm upgrade --install my-zk k8szk/zookeeper \
+  --namespace my-zk --create-namespace \
+  --set AntiAffinity=hard \
+  --set Cpu=2 \
+  --set Servers=3 \
+  --set Storage="250Gi" \
+  --set StorageClass="zookeeper"
+```
+
+**For OpenShift deployments:**
+Set the `OpenShift` flag to `true` to automatically create a RoleBinding for the `nonroot-v2` SCC (the least permissive SCC that allows UID 1010):
+```bash
+helm repo add k8szk https://kubernetes-zookeeper.github.io/kubernetes-zookeeper/helm/repo/
+helm repo update
+helm upgrade --install my-zk k8szk/zookeeper \
+  --namespace my-zk --create-namespace \
+  --set OpenShift=true \
+  --set AntiAffinity=hard \
+  --set Cpu=2 \
+  --set Servers=3 \
+  --set Storage="250Gi" \
+  --set StorageClass="zookeeper"
+```
+
+**ServiceAccount and SCC Configuration:**
+- By default, a ServiceAccount named `zookeeper` is created (`ServiceAccount.create: true`)
+- When `OpenShift: true`, a RoleBinding is automatically created to grant the `nonroot-v2` SCC to the ServiceAccount
+- The `nonroot-v2` SCC is the least permissive standard SCC that allows running with UID 1010
+- You can disable the RoleBinding by setting `ServiceAccount.clusterRole.nonroot-v2.enabled: false`
+
+**Note:** If your StorageClass requires a different UID/GID, override `RunAsUser` and `FsGroup` accordingly. Ensure the selected SCC allows that UID.
+
+See [OPENSHIFT-SETUP.md](OPENSHIFT-SETUP.md) for detailed OpenShift setup instructions.
+
 ### Resources
 The configuration parameters in this section control the resources requested and utilized by the ZooKeeper ensemble.
 
@@ -112,8 +160,8 @@ The configuration parameters in this section control the resources requested and
 | `Cpu` | The amount of CPU to request. As ZooKeeper is not very CPU intensive, `2` is a good choice to start with for a production deployment. | `1` |
 | `Heap` | The amount of JVM heap that the ZooKeeper servers will use. As ZooKeeper stores all of its data in memory, this value should reflect the size of your working set. The JVM -Xms/-Xmx format is used. |`2G` |
 | `Memory` | The amount of memory to request. This value should be at least 2 GiB larger than `Heap` to avoid swapping. You many want to use `1.5 * Heap` for values larger than 2GiB. The Kubernetes format is used. |`2Gi` |
-| `Storage` | The amount of Storage to request. Even though ZooKeeper keeps is working set in memory, it logs all transactions, and periodically snapshots, to storage media. The amount of storage required will vary with your workload, working memory size, and log and snapshot retention policy. Note that, on some cloud providers selecting a small volume size will result is sub-par I/O performance. 250 GiB is a good place to start for production workloads. | `50Gi`|
-| `StorageClass` | The storage class of the storage allocated for the ensemble. If this value is present, it will add an annotation asking the PV Provisioner for that storage class. | `default` |
+| `Storage` | The amount of Storage to request. Even though ZooKeeper keeps is working set in memory, it logs all transactions, and periodically snapshots, to storage media. The amount of storage required will vary with your workload, working memory size, and log and snapshot retention policy. Note that, on some cloud providers selecting a small volume size will result is sub-par I/O performance. 250 GiB is a good place to start for production workloads. | `250Gi`|
+| `StorageClass` | The storage class of the storage allocated for the ensemble. If this value is present, it will be used as the `storageClassName` in the PersistentVolumeClaim. If not specified, the cluster's default StorageClass will be used. | (empty, uses cluster default) |
 
 ### Network 
 These parameters control the network ports on which the ensemble communicates.
@@ -164,6 +212,16 @@ and ELK.
 | --------- | ----------- | ------- |
 | `LogLevel` | The log level of the ZooKeeper applications. One of `ERROR`,`WARN`,`INFO`,`DEBUG`. | `INFO` |
 
+### Security Context
+These parameters control the security context for the ZooKeeper pods. By default, these are set to `1010` to match common StorageClass mountOptions requirements.
+
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
+| `RunAsUser` | The user ID (UID) to run the container as. Set to a specific UID (e.g., `1010`) or empty string `""` for platform-managed UIDs. | `1010` |
+| `FsGroup` | The group ID (GID) for the volume ownership. Set to a specific GID (e.g., `1010`) or empty string `""` for platform-managed GIDs. | `1010` |
+
+**Note:** When both values are set (non-empty), the security context is applied to the pod spec. Set to empty strings (`""`) to omit the security context and let the platform handle UID assignment. For StorageClasses with specific mountOptions (e.g., `uid=1010`), ensure `RunAsUser` and `FsGroup` match those values.
+
 ### Liveness and Readiness
 The servers in the ensemble have both liveness and readiness checks specified. These parameters can be used to tune 
 the sensitivity of the liveness and readiness checks.
@@ -179,6 +237,26 @@ This parameter controls when the image is pulled from the repository.
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
 | `ImagePullPolicy` | The policy for pulling the image from the repository. | `Always` |
+
+### ServiceAccount
+These parameters control the ServiceAccount used by the ZooKeeper pods. A ServiceAccount is created by default for OpenShift compatibility.
+
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
+| `ServiceAccount.create` | Whether to create a ServiceAccount. | `true` |
+| `ServiceAccount.name` | The name of the ServiceAccount to create or use. | `"zookeeper"` |
+| `ServiceAccount.clusterRole.nonroot-v2.enabled` | Whether to create a RoleBinding for the `nonroot-v2` SCC (OpenShift only). Only takes effect when `OpenShift: true`. | `true` |
+
+**Note:** The ServiceAccount is used by the pods via `serviceAccountName`. For OpenShift deployments, set `OpenShift: true` to automatically grant the `nonroot-v2` SCC to the ServiceAccount.
+
+### OpenShift
+This parameter enables OpenShift-specific features.
+
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
+| `OpenShift` | When set to `true`, creates a RoleBinding to grant the `nonroot-v2` SCC to the ServiceAccount. Must be `true` for OpenShift deployments using UID 1010. | `false` |
+
+**Note:** Set this to `true` when deploying on OpenShift to automatically configure the necessary SCC permissions. The RoleBinding is only created if `ServiceAccount.clusterRole.nonroot-v2.enabled` is also `true`.
 
 ## Scaling
 
